@@ -11,7 +11,6 @@ export const subscriber = createClient({
     url: mode === 'prod' ? prodUrl : devUrl
 })
 
-
 subscriber.connect();
 
 subscriber.on('connect', () => {
