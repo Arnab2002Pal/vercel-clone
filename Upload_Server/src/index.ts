@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import router from './routes/router';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -13,8 +12,8 @@ app.use(express.json());
 app.use(router)
 
 const port = process.env.PORT
-const mode = process.env.NODE_ENV?.trim()
+const mode = process.env.NODE_ENV?.trim().toUpperCase()
 
 app.listen(port, ()=>{
-    console.log(`Mode: ${mode}, Port: ${port}`);  
+    console.log(`Server started in ${mode} mode on port ${port}`);  
 })
