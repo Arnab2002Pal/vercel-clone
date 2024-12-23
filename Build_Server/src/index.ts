@@ -1,9 +1,10 @@
 import { commandOptions } from "redis";
 import { subscriber } from "./config/redis";
 import dotenv from 'dotenv'
-import { buildOutput, downloadS3folder } from "./utils/util";
+import { deleteLocalFile, downloadS3folder } from "./utils/util";
 import { exec, execSync } from "child_process";
 import path from 'path'
+import fs from 'fs'
 
 dotenv.config()
 
@@ -20,13 +21,18 @@ async function main (){
 
             await downloadS3folder(`output\\${response.element}\\`);
             */
-            const basePath = path.join(__dirname, '/output_build');
-            const normalizedBasePath = basePath.replace(/\\/g, '/');
-            const quoatedPath = `"${normalizedBasePath}"`
-
             await downloadS3folder(`output\\${response.element}\\`)
 
             console.log("starting Docker");
+            const basePath = path.join(__dirname, '/output_build');
+            const deleteOutput = path.join(__dirname, `/output`);
+            const normalizedBasePath = basePath.replace(/\\/g, '/');
+            const quoatedPath = `"${normalizedBasePath}"`
+
+            if (!fs.existsSync(basePath)) {
+                fs.mkdirSync(basePath, { recursive: true });
+                console.log(`Directory created at: ${basePath}`);
+            }
 
             exec(`docker build -t build-container --build-arg DIRECTORY_ID=${response.element} . 2>&1`, async (error, stdout) => {
                 if (error) {
@@ -51,6 +57,8 @@ async function main (){
                 // Optionally remove the image
                 execSync(`docker rmi build-container`);
                 console.log("Docker image removed successfully.");
+
+                await deleteLocalFile(deleteOutput)
             })
             
         }
