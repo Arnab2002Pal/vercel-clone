@@ -14,10 +14,10 @@ export const subscriber = createClient({
 subscriber.connect();
 
 subscriber.on('connect', () => {
-    console.log(`Redis client connected successfully with ${process.env.NODE_ENV?.trim()} mode.`);
+    console.log(`[SERVER] Redis client connected successfully with ${process.env.NODE_ENV?.trim()} mode.`);
 });
 
 // Listen for errors to handle connection issues
 subscriber.on('error', (err) => {
-    console.error('Redis connection error:', err);
+    console.error('[SERVER] Redis connection error:', err);
 });

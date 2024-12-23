@@ -1,10 +1,10 @@
 import { commandOptions } from "redis";
 import { subscriber } from "./config/redis";
 import dotenv from 'dotenv'
-import { deleteLocalFile, createDirectoryIfNotExists } from "./utils/util";
+import { deleteLocalFile, createDirectoryIfNotExists, readAllFiles } from "./utils/util";
 import path from 'path'
 import { buildAndRunDockerContainer } from "./utils/docker.util";
-import { downloadS3folder } from "./utils/aws.util";
+import { downloadS3folder, uploadFileS3 } from "./utils/aws.util";
 
 dotenv.config()
 
@@ -30,6 +30,7 @@ async function processQueue() {
                 console.log("[SERVER] Starting Docker build process...");
                 const buildOutputPath = path.join(__dirname, `/output_build/${id}`);
                 const deleteOutputPath = path.join(__dirname, "/output");
+                const deleteBuildOutputPath = path.join(__dirname, "/output_build");
 
                 createDirectoryIfNotExists(buildOutputPath);
 
@@ -37,6 +38,28 @@ async function processQueue() {
 
                 console.log("[SERVER] Cleaning up local files...");
                 await deleteLocalFile(deleteOutputPath);
+
+                
+                console.log("[SERVER] Reading local files...");
+                const files = await readAllFiles(buildOutputPath)
+                
+                console.log(`Found ${files.length} files. Uploading to S3...`);
+                
+                console.log("[SERVER] Uploading local files to Bucket");
+                const promiseUpload = files.map(async localfile =>{
+                    const baseDir = path.join(__dirname, '../dist')
+                    // Tells on "how to get from point A to point B"
+                    const relativePath = path.relative(baseDir, localfile)
+                    return uploadFileS3(relativePath, localfile)
+                })
+                
+                await Promise.all(promiseUpload);
+                console.log("[Deploy] All files uploaded successfully.");
+                                
+                console.log("[Deploy] Removing Build directory");
+                await deleteLocalFile(deleteBuildOutputPath);
+                console.log("[Deploy] Build directory removed successfully");
+
             }
         } catch (error) {
             console.error("[SERVER] Error processing build task:", error);

@@ -7,6 +7,7 @@ import {
 import path from 'path'
 import { s3Client } from "../config/aws";
 import fs from 'fs'
+import { Upload } from "@aws-sdk/lib-storage";
 
 /**
  * This function downloads all files from a specified S3 prefix to the local filesystem.
@@ -80,4 +81,51 @@ export async function downloadS3folder(prefix: string) {
     }
 }
 
+/**
+ * Uploads a file to Amazon S3.
+ *
+ * @param {string} fileName - The desired file path and name in the S3 bucket where the file will be stored. 
+ *                            This should include the folder structure (if any) and the file name with its extension.
+ *                            For example, 'uploads/images/photo.jpg' will store the file in the 'uploads/images' folder 
+ *                            with the name 'photo.jpg' in the S3 bucket.
+ * @param {string} localFilePath - The full path to the file on the local file system to upload.
+ *                                 For example, '/Users/username/Documents/photo.jpg'.
+ * @returns {Promise<void>} - A Promise that resolves when the upload is complete.
+ */
+export const uploadFileS3 = async (fileName: string, localFilePath: string) => {
+    try {
+        const fileContent = fs.readFileSync(localFilePath);
 
+        const upload = new Upload({
+            client: s3Client,
+            params: {
+                Bucket: 'vercel-clone-bucket-2002',
+                Key: fileName,
+                Body: fileContent,
+            },
+        });
+
+        upload.on('httpUploadProgress', (progress) => {
+            const isSmallFile = progress.total && progress.total < 1024 * 1024; // Check if the file size is less than 1 MB
+            if (isSmallFile) {
+                console.log(
+                    `[S3] Uploading: ${progress.loaded} bytes of ${progress.total ? progress.total : 'Unknown'
+                    } bytes.`
+                );
+            } else {
+                const loadedMB = (progress.loaded! / (1024 * 1024)).toFixed(2);
+                const totalMB = progress.total
+                    ? (progress.total / (1024 * 1024)).toFixed(2)
+                    : 'Unknown';
+
+                console.log(
+                    `[S3] Uploading: ${loadedMB} MB of ${totalMB} MB`
+                );
+            }
+        });
+
+        await upload.done();
+    } catch (error) {
+        console.error('Error uploading file:', error);
+    }
+};

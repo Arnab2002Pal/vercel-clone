@@ -52,7 +52,6 @@ export function readAllFiles(folderPath: string): string[] {
     return response;
 }
 
-
 /**
  * Uploads a file to Amazon S3.
  *
@@ -81,7 +80,7 @@ export const uploadFileS3 = async (fileName: string, localFilePath: string) => {
             const isSmallFile = progress.total && progress.total < 1024 * 1024; // Check if the file size is less than 1 MB
             if (isSmallFile) {
                 console.log(
-                    `Uploading: ${progress.loaded} bytes of ${progress.total ? progress.total : 'Unknown'
+                    `[S3] Uploading: ${progress.loaded} bytes of ${progress.total ? progress.total : 'Unknown'
                     } bytes.`
                 );
             } else {
@@ -91,7 +90,7 @@ export const uploadFileS3 = async (fileName: string, localFilePath: string) => {
                     : 'Unknown';
               
                 console.log(
-                    `Uploading: ${loadedMB} MB of ${totalMB} MB`
+                    `[S3] Uploading: ${loadedMB} MB of ${totalMB} MB`
                 );
             }
         });
