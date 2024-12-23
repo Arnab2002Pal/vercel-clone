@@ -27,7 +27,6 @@ export async function downloadS3folder(prefix: string) {
             console.error("No files found in the specified S3 prefix.");
             return;
         }
-       
         for(const obj of listResponse.Contents) {
             if(!obj.Key){
                 console.error("No key found in the.");
@@ -73,27 +72,22 @@ export async function downloadS3folder(prefix: string) {
     
 }
 
-export const buildOutput = () => {
-    const basePath = path.join(__dirname, '../output_build');   
-    console.log(basePath);
+/**
+ * Deletes a local directory and all its contents recursively.
+ *
+ * @param {string} directory - The path to the local directory to be deleted.
+ *                            This should include the full path to the directory on the local file system.
+ *                            For example, '/Users/username/Documents/myFolder'.
+ *
+ * @returns {void} - The function does not return any value.
+ *                   However, it logs a success message to the console if the directory is successfully deleted,
+ *                   or logs an error message to the console if an error occurs during the deletion process.
+ */
+export const deleteLocalFile = (directory: string) => {
     try {
-        // const containerId = execSync(`docker create build-container`).toString().trim();
-
-        exec(`docker run temp-build-container build-container`, (error, stdout) => {
-            if(error) throw error;
-            console.log(stdout);
-            
-            execSync(`docker cp temp-build-container:/app/dist ${basePath}`)
-            console.log("Build artifacts copied successfully.");
-            
-            execSync(`docker rm temp-build-container`);
-            console.log("Temporary container removed successfully.");
-    
-            execSync(`docker rmi build-container`);
-            console.log("Docker image removed successfully.");
-        })
-
-    } catch (error:any) {
-        console.error("Error during build output process:", error.message);
+        fs.rmSync(directory, { recursive: true, force: true });
+        console.log(`Successfully deleted directory`);
+    } catch (error) {
+        console.error(`Failed to delete directory:`, error);
     }
 }
