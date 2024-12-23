@@ -30,6 +30,7 @@ const deploy = async (req: Request, res: Response) => {
         // Upload files in parallel
         const uploadPromises = files.map(async (localFile) => {
             const baseDir = path.join(__dirname, '../');
+            // Tells on "how to get from point A to point B"
             const relativePath = path.relative(baseDir, localFile);
             return uploadFileS3(relativePath, localFile);
         });
