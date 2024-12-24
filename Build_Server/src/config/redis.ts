@@ -21,3 +21,18 @@ subscriber.on('connect', () => {
 subscriber.on('error', (err) => {
     console.error('[SERVER] Redis connection error:', err);
 });
+
+export const statusSubscriber = createClient({
+    url: mode === 'prod' ? prodUrl : devUrl
+})
+
+statusSubscriber.connect();
+
+statusSubscriber.on('connect', () => {
+    console.log(`[SERVER] Redis client connected successfully with ${process.env.NODE_ENV?.trim()} mode.`);
+});
+
+// Listen for errors to handle connection issues
+statusSubscriber.on('error', (err) => {
+    console.error('[SERVER] Redis connection error:', err);
+});

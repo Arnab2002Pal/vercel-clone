@@ -1,5 +1,5 @@
 import { commandOptions } from "redis";
-import { subscriber } from "./config/redis";
+import { statusSubscriber, subscriber } from "./config/redis";
 import dotenv from 'dotenv'
 import { deleteLocalFile, createDirectoryIfNotExists, readAllFiles } from "./utils/util";
 import path from 'path'
@@ -59,6 +59,9 @@ async function processQueue() {
                 console.log("[Deploy] Removing Build directory");
                 await deleteLocalFile(deleteBuildOutputPath);
                 console.log("[Deploy] Build directory removed successfully");
+
+                await statusSubscriber.hSet("status", id, "Deployed")
+                console.log(`[Deploy] Status: Deployed for ID: ${id}`);
 
             }
         } catch (error) {

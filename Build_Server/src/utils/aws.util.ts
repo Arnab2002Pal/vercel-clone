@@ -31,15 +31,15 @@ export async function downloadS3folder(prefix: string) {
         )
 
         if (!listResponse.Contents || listResponse.Contents.length === 0) {
-            console.error("[S3 Bucket] No files found in the specified S3 prefix.");
+            console.error("[S3] No files found in the specified S3 prefix.");
             return;
         }
 
-        console.log(`[S3 Bucket] Total Downloadable Files: ${listResponse.Contents.length}`)
+        console.log(`[S3] Total Downloadable Files: ${listResponse.Contents.length}`)
 
         for (const obj of listResponse.Contents) {
             if (!obj.Key) {
-                console.error("[S3 Bucket] No key found in the.");
+                console.error("[S3] No key found in the.");
                 break;
             }
 
@@ -63,17 +63,17 @@ export async function downloadS3folder(prefix: string) {
             }
         }
 
-        console.log("[S3 Bucket] File downloaded Successfully");
+        console.log("[S3] File downloaded Successfully");
 
 
     } catch (error) {
         if (error instanceof NoSuchKey) {
             console.error(
-                `[S3 Bucket] Error from S3 while getting object "${prefix}" from "vercel-clone". No such key exists.`,
+                `[S3] Error from S3 while getting object "${prefix}" from "vercel-clone". No such key exists.`,
             );
         } else if (error instanceof S3ServiceException) {
             console.error(
-                `[S3 Bucket] Error from S3 while getting object from vercel-clone.  ${error.name}: ${error.message}`,
+                `[S3] Error from S3 while getting object from vercel-clone.  ${error.name}: ${error.message}`,
             );
         } else {
             throw error;

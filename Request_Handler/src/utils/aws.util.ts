@@ -1,14 +1,11 @@
 import {
     GetObjectCommand,
-    ListObjectsV2Command,
     NoSuchKey,
     S3ServiceException,
 } from "@aws-sdk/client-s3";
 import { s3Client } from "../configs/aws";
 import dotenv from 'dotenv';
 dotenv.config()
-import path from 'path';
-import fs from 'fs';
 
 /**
  * This function downloads all files from a specified S3 prefix to the local filesystem.
@@ -23,8 +20,6 @@ import fs from 'fs';
  */
 export async function downloadS3file(id: string, path: string) {
     try {
-        // List all objects with the given prefix
-
         const response = await s3Client.send(
             new GetObjectCommand({
                 Bucket: process.env.AWS_BUCKET!,
@@ -34,18 +29,18 @@ export async function downloadS3file(id: string, path: string) {
 
         if (response.Body) {
             const bodyString = await response.Body.transformToString() // Await the Promise here
-            console.log("[S3 Buckxet] File downloaded Successfully");
+            console.log("[S3] File downloaded Successfully");
             return bodyString
         }
     }
      catch (error) {
         if (error instanceof NoSuchKey) {
             console.error(
-                `[S3 Bucket] Error from S3 while getting object "${id}" from "vercel-clone". No such key exists.`,
+                `[S3] Error from S3 while getting object "${id}" from "vercel-clone". No such key exists.`,
             );
         } else if (error instanceof S3ServiceException) {
             console.error(
-                `[S3 Bucket] Error from S3 while getting object from vercel-clone.  ${error.name}: ${error.message}`,
+                `[S3] Error from S3 while getting object from vercel-clone.  ${error.name}: ${error.message}`,
             );
         } else {
             throw error;
