@@ -15,5 +15,5 @@ const port = process.env.PORT
 const mode = process.env.NODE_ENV?.trim().toUpperCase()
 
 app.listen(port, ()=>{
-    console.log(`Server started in ${mode} mode on port ${port}`);  
+    console.log(`[Server] Started in ${mode} mode on port: ${port}`);  
 })

@@ -14,10 +14,26 @@ export const publisher = createClient({
 publisher.connect();
 
 publisher.on('connect', () => {
-    console.log(`Redis client connected successfully in ${process.env.NODE_ENV?.trim() === 'prod' ? 'Production' : "Development"} mode.`);
+    console.log(`[REDIS] Client connected successfully in ${process.env.NODE_ENV?.trim() === 'prod' ? 'Production' : "Development"} mode.`);
 });
 
 // Listen for errors to handle connection issues
 publisher.on('error', (err) => {
-    console.error('Redis connection error:', err);
+    console.error('[REDIS] Connection error:', err);
+});
+
+
+export const subscriber = createClient({
+    url: mode === 'prod' ? prodUrl : devUrl
+})
+
+subscriber.connect();
+
+subscriber.on('connect', () => {
+    console.log(`[REDIS] Subscriber client connected successfully in ${process.env.NODE_ENV?.trim() === 'prod' ? 'Production' : "Development"} mode.`);
+});
+
+// Listen for errors to handle connection issues
+subscriber.on('error', (err) => {
+    console.error('[REDIS] Subscriber connection error:', err);
 });

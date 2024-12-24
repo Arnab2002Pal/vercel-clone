@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { deleteLocalFile, generateID, readAllFiles, uploadFileS3 } from "../utils/util";
 import simpleGit from "simple-git";
 import path from 'path'
-import { publisher } from "../config/redis";
+import { publisher, subscriber } from "../config/redis";
 
 const test = (req: Request, res: Response) => {
     res.status(200).json({
@@ -16,7 +16,7 @@ const deploy = async (req: Request, res: Response) => {
     try {
         // Extract username and generate unique ID
         const username = repoUrl.split("/")[3];
-        const id = generateID(username);
+        const id = generateID(username).toLowerCase();
         const basePath = path.join(__dirname, `../output/${id}`);
 
         console.log(`[Deploy] Cloning repository: ${repoUrl}`);
@@ -44,6 +44,10 @@ const deploy = async (req: Request, res: Response) => {
         console.log("[Deploy] Cleaning up local files...");
         await deleteLocalFile(basePath);
 
+        // Using redis as DB
+        await publisher.hSet("status", id, "Uploaded");
+        console.log(`[Deploy] Status: Uploaded for ID: ${id}`);
+
         res.status(200).json({ id });
     } catch (error) {
         console.error("[Deploy] Deployment failed:", error);
@@ -53,10 +57,19 @@ const deploy = async (req: Request, res: Response) => {
     }
 };
 
+const status = async(req: Request, res: Response) => {
+    const id = req.query.id;
+    const response = await subscriber.hGet("status", id as string)
+    res.status(200).json({
+        id: response
+    })
+};
+
 export default deploy;
 
 
 export {
     test,
-    deploy
+    deploy,
+    status
 }
