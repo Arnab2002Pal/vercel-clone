@@ -70,7 +70,7 @@ export function CardWithForm() {
                             <Label htmlFor="name">Name</Label>
                             <Input
                                 id="name"
-                                placeholder="Name of your project"
+                                placeholder="Github Repo to your project"
                                 value={gitRepo}
                                 onChange={(e) => {
                                     setGitRepo(e.target.value)
