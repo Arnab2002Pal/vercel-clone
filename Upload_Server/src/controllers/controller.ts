@@ -61,7 +61,7 @@ const status = async(req: Request, res: Response) => {
     const id = req.query.id;
     const response = await subscriber.hGet("status", id as string)
     res.status(200).json({
-        id: response
+        status: response
     })
 };
 
